@@ -5147,6 +5147,19 @@ function UILibrary.Section:Slider(sett, callback)
         functions.setValue(tonumber((((sett.Max - sett.Min) / 2) + sett.Min)), scale)
     end
 
+    -- Customize the slider handle to be a circle that doesn't fully fit inside the bar
+    local handle = Instance.new("Frame")
+    handle.Size = UDim2.new(0, 20, 0, 20)  -- Adjust size as needed
+    handle.Position = UDim2.new(0.5, -10, 0.5, -10)
+    handle.AnchorPoint = Vector2.new(0.5, 0.5)
+    handle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    handle.BorderSizePixel = 0
+    handle.Parent = element.Drag
+
+    local handleCorner = Instance.new("UICorner")
+    handleCorner.CornerRadius = UDim.new(1, 0)  -- Fully rounded to make it a circle
+    handleCorner.Parent = handle
+
     local meta =
         setmetatable(
         {
