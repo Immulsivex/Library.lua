@@ -5023,11 +5023,11 @@ function UILibrary.Section:Slider(sett, callback)
     local element = cheatBase.Content.ElementContent.Slider
 
     if sett.Min == nil then
-        sett.Min = 0
+        sett.Min = 1
     end
 
     if sett.Max == nil then
-        sett.Max = 10
+        sett.Max = 100
     end
 
     local sliderValue = sett.Min
@@ -5389,7 +5389,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             element.OptionHolder.Visible = true
 
             task.delay(
-                .4,
+                .3,
                 function()
                     if menuOpen then
                         TweenService:Create(
