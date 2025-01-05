@@ -5220,6 +5220,11 @@ function UILibrary.Section:Dropdown(sett, callback)
     scrollingFrame.BorderSizePixel = 0
     scrollingFrame.BackgroundTransparency = 1
 
+    -- Add UIListLayout with spacing of (0, 2)
+    local listLayout = Instance.new("UIListLayout", scrollingFrame)
+    listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    listLayout.Padding = UDim.new(0, 2)
+
     functions.refreshUI = function()
         local String = ""
 
@@ -5310,7 +5315,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             totalCounter = totalCounter + 1
         end
 
-        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalCounter * slot.Size.Y.Offset)
+        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalCounter * (slot.Size.Y.Offset + listLayout.Padding.Offset))
 
         for v, i in pairs(options) do
             local Option
