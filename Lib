@@ -1,6 +1,6 @@
 local UILibrary = {}
 
--- [ Lib By overhellc/OverHellCurses On Discord ]
+-- [ Lib By overhellc/OverHellCurses On Discord. ]
 
 local function getObjGen()
     local objGen = {}
