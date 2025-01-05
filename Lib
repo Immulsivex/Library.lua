@@ -5190,11 +5190,19 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     local optionConnections = {}
 
+    local scrollingFrame = Instance.new("ScrollingFrame", element.OptionHolder.ContentHolder)
+    scrollingFrame.Size = UDim2.fromScale(1, 1)
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scrollingFrame.ScrollBarThickness = 8
+    scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    scrollingFrame.BorderSizePixel = 0
+    scrollingFrame.BackgroundTransparency = 1
+
     functions.refreshUI = function()
         local String = ""
 
         for i, v in pairs(options) do
-            local ui = element.OptionHolder.ContentHolder.Content:FindFirstChild(i)
+            local ui = scrollingFrame:FindFirstChild(i)
 
             if options[i] then
                 TweenService:Create(
@@ -5230,7 +5238,7 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     functions.setValue = function(option, value, isDefault)
         if options[option] ~= nil then
-            if element.OptionHolder.ContentHolder.Content:FindFirstChild(option) then
+            if scrollingFrame:FindFirstChild(option) then
                 if sett.Multi == true then
                     options[option] = value
 
@@ -5257,7 +5265,7 @@ function UILibrary.Section:Dropdown(sett, callback)
     end
 
     local function updateDropdown()
-        for i, v in pairs(element.OptionHolder.ContentHolder.Content:GetChildren()) do
+        for i, v in pairs(scrollingFrame:GetChildren()) do
             if v:IsA("GuiObject") then
                 v:Destroy()
             end
@@ -5274,6 +5282,8 @@ function UILibrary.Section:Dropdown(sett, callback)
             totalCounter = totalCounter + 1
         end
 
+        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalCounter * slot.Size.Y.Offset)
+
         for v, i in pairs(options) do
             local Option
 
@@ -5288,7 +5298,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             end
 
             Option.Name = v
-            Option.Parent = element.OptionHolder.ContentHolder.Content
+            Option.Parent = scrollingFrame
             Option.LayoutOrder = i
             Option.Size = UDim2.fromScale(1, 1 / totalCounter)
 
@@ -5337,186 +5347,93 @@ function UILibrary.Section:Dropdown(sett, callback)
     end
 
     updateDropdown()
+end
 
-    functions.updateDropdown = function(new)
-        options = new
+functions.updateDropdown = function(new)
+    options = new
 
-        updateDropdown()
-        functions.refreshUI()
-    end
+    local function updateDropdown()
+        for i, v in pairs(scrollingFrame:GetChildren()) do
+            if v:IsA("GuiObject") then
+                v:Destroy()
+            end
+        end
 
-    functions.openMenu = function()
+        for i, v in pairs(optionConnections) do
+            v:Disconnect()
+        end
+
+        local counter = 0
         local totalCounter = 0
 
         for i, v in pairs(options) do
             totalCounter = totalCounter + 1
         end
 
-        if totalCounter == 0 then
-            return
-        end
+        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalCounter * slot.Size.Y.Offset)
 
-        menuOpen = not menuOpen
+        for v, i in pairs(options) do
+            local Option
 
-        if menuOpen then
-            TweenService:Create(
-                element.MainHolder.Content.Icon.Holder,
-                TI,
-                {
-                    Rotation = 180
-                }
-            ):Play()
+            counter = counter + 1
 
-            TweenService:Create(
-                element.OptionHolder,
-                TI,
-                {
-                    Size = UDim2.fromScale(1, math.clamp(totalCounter, 0, 999) * .7)
-                }
-            ):Play()
+            if counter == totalCounter then
+                Option = bottom:Clone()
+            elseif counter ~= 1 then
+                Option = slot:Clone()
+            else
+                Option = top:Clone()
+            end
 
-            local n = 15 + (10 * math.clamp(totalCounter, 0, 3))
+            Option.Name = v
+            Option.Parent = scrollingFrame
+            Option.LayoutOrder = i
+            Option.Size = UDim2.fromScale(1, 1 / totalCounter)
 
-            TweenService:Create(
-                element.OptionHolder.Cover.DropShadow,
-                TI,
-                {
-                    ImageTransparency = 0.5,
-                    Size = UDim2.new(1, n, 1, n)
-                }
-            ):Play()
+            Option.Current.Text = v
 
-            element.OptionHolder.Visible = true
+            table.insert(
+                optionConnections,
+                Option.InputBegan:Connect(
+                    function(input, gp)
+                        if gp then
+                            return
+                        end
 
-            task.delay(
-                .3,
-                function()
-                    if menuOpen then
-                        TweenService:Create(
-                            element.OptionHolder.Cover,
-                            TI,
-                            {
-                                BackgroundTransparency = 1
-                            }
-                        ):Play()
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            functions.setValue(v, not options[v])
+                        elseif input.UserInputType == Enum.UserInputType.MouseMovement then
+                            TweenService:Create(
+                                Option,
+                                TI,
+                                {
+                                    ImageColor3 = Color3.fromRGB(20, 20, 20)
+                                }
+                            ):Play()
+                        end
                     end
-                end
+                )
             )
-        else
-            TweenService:Create(
-                element.MainHolder.Content.Icon.Holder,
-                TI,
-                {
-                    Rotation = 0
-                }
-            ):Play()
 
-            TweenService:Create(
-                element.OptionHolder,
-                TI,
-                {
-                    Size = UDim2.fromScale(1, 0)
-                }
-            ):Play()
-
-            TweenService:Create(
-                element.OptionHolder.Cover.DropShadow,
-                TI,
-                {
-                    ImageTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0)
-                }
-            ):Play()
-
-            TweenService:Create(
-                element.OptionHolder.Cover,
-                TweenInfo.new(.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
-                {
-                    BackgroundTransparency = 0
-                }
-            ):Play()
-
-            task.delay(
-                .4,
-                function()
-                    if menuOpen then
-                        return
+            table.insert(
+                optionConnections,
+                Option.InputEnded:Connect(
+                    function(input, gp)
+                        if input.UserInputType == Enum.UserInputType.MouseMovement then
+                            TweenService:Create(
+                                Option,
+                                TI,
+                                {
+                                    ImageColor3 = Color3.fromRGB(25, 25, 25)
+                                }
+                            ):Play()
+                        end
                     end
-
-                    element.OptionHolder.Visible = false
-                end
+                )
             )
         end
     end
 
-    functions.getValue = function()
-        return options
-    end
-
-    table.insert(
-        conns,
-        element.MainHolder.Content.Icon.InputBegan:Connect(
-            function(input, gp)
-                if gp then
-                    return
-                end
-
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    TweenService:Create(
-                        element.MainHolder.Content.Icon.Holder.Icon,
-                        TI,
-                        {
-                            Position = UDim2.fromScale(0, .2),
-                            ImageColor3 = Color3.fromRGB(50, 50, 50)
-                        }
-                    ):Play()
-                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    functions.openMenu()
-                end
-            end
-        )
-    )
-
-    table.insert(
-        conns,
-        element.MainHolder.Content.Icon.InputEnded:Connect(
-            function(input, gp)
-                if gp then
-                    return
-                end
-
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    TweenService:Create(
-                        element.MainHolder.Content.Icon.Holder.Icon,
-                        TI,
-                        {
-                            Position = UDim2.fromScale(0, 0),
-                            ImageColor3 = Color3.fromRGB(100, 100, 100)
-                        }
-                    ):Play()
-                end
-            end
-        )
-    )
-
-    if sett.Default then
-        functions.setValue(sett.Default, true, true)
-    end
-
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
-
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
-
-    return meta
+    updateDropdown()
+    functions.refreshUI()
 end
-
-return UILibrary
