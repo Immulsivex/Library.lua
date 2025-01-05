@@ -5023,11 +5023,11 @@ function UILibrary.Section:Slider(sett, callback)
     local element = cheatBase.Content.ElementContent.Slider
 
     if sett.Min == nil then
-        sett.Min = 0
+        sett.Min = 1
     end
 
     if sett.Max == nil then
-        sett.Max = 10
+        sett.Max = 100
     end
 
     local sliderValue = sett.Min
@@ -5190,11 +5190,19 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     local optionConnections = {}
 
+    local scrollingFrame = Instance.new("ScrollingFrame", element.OptionHolder.ContentHolder)
+    scrollingFrame.Size = UDim2.fromScale(1, 1)
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scrollingFrame.ScrollBarThickness = 8
+    scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    scrollingFrame.BorderSizePixel = 0
+    scrollingFrame.BackgroundTransparency = 1
+
     functions.refreshUI = function()
         local String = ""
 
         for i, v in pairs(options) do
-            local ui = element.OptionHolder.ContentHolder.Content:FindFirstChild(i)
+            local ui = scrollingFrame:FindFirstChild(i)
 
             if options[i] then
                 TweenService:Create(
@@ -5230,7 +5238,7 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     functions.setValue = function(option, value, isDefault)
         if options[option] ~= nil then
-            if element.OptionHolder.ContentHolder.Content:FindFirstChild(option) then
+            if scrollingFrame:FindFirstChild(option) then
                 if sett.Multi == true then
                     options[option] = value
 
@@ -5256,8 +5264,14 @@ function UILibrary.Section:Dropdown(sett, callback)
         end
     end
 
+    functions.updateDropdown = function(new)
+        options = new
+        updateDropdown()
+        functions.refreshUI()
+    end
+
     local function updateDropdown()
-        for i, v in pairs(element.OptionHolder.ContentHolder.Content:GetChildren()) do
+        for i, v in pairs(scrollingFrame:GetChildren()) do
             if v:IsA("GuiObject") then
                 v:Destroy()
             end
@@ -5274,6 +5288,8 @@ function UILibrary.Section:Dropdown(sett, callback)
             totalCounter = totalCounter + 1
         end
 
+        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, totalCounter * slot.Size.Y.Offset)
+
         for v, i in pairs(options) do
             local Option
 
@@ -5288,7 +5304,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             end
 
             Option.Name = v
-            Option.Parent = element.OptionHolder.ContentHolder.Content
+            Option.Parent = scrollingFrame
             Option.LayoutOrder = i
             Option.Size = UDim2.fromScale(1, 1 / totalCounter)
 
@@ -5338,13 +5354,6 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     updateDropdown()
 
-    functions.updateDropdown = function(new)
-        options = new
-
-        updateDropdown()
-        functions.refreshUI()
-    end
-
     functions.openMenu = function()
         local totalCounter = 0
 
@@ -5389,7 +5398,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             element.OptionHolder.Visible = true
 
             task.delay(
-                .4,
+                .3,
                 function()
                     if menuOpen then
                         TweenService:Create(
