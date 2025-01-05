@@ -5389,7 +5389,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             element.OptionHolder.Visible = true
 
             task.delay(
-                .4,
+                .25,
                 function()
                     if menuOpen then
                         TweenService:Create(
