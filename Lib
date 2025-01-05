@@ -1210,7 +1210,7 @@ local function getObjGen()
             Gui.Watermark.BackgroundTransparency = 1.000
             Gui.Watermark.Size = UDim2.new(0.5, 0, 0.0199999996, 0)
             Gui.Watermark.Font = Enum.Font.Gotham
-            Gui.Watermark.Text = "PhysicDisablers lib | nil | nil"
+            Gui.Watermark.Text = "overhellc's lib | nil | nil"
             Gui.Watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Watermark.TextSize = 14.000
             Gui.Watermark.TextStrokeTransparency = 0.800
@@ -2397,6 +2397,28 @@ local function getObjGen()
             Gui.UIListLayout_28.SortOrder = Enum.SortOrder.LayoutOrder
             Gui.UIListLayout_28.VerticalAlignment = Enum.VerticalAlignment.Center
             Gui.UIListLayout_28.Padding = UDim.new(0.0299999993, 0)
+
+            local mainFrame = Instance.new("Frame")
+            mainFrame.Size = UDim2.new(0.3, 0, 0.3, 0)
+            mainFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
+            mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 48)
+            mainFrame.BorderSizePixel = 0 
+            mainFrame.Parent = mainGui
+
+            local closeButton = Instance.new("TextButton")
+            closeButton.Size = UDim2.new(0, 50, 0, 50)
+            closeButton.Position = UDim2.new(1, -60, 0, -10)
+            closeButton.AnchorPoint = Vector2.new(1, 0) 
+            closeButton.BackgroundColor3 = Color3.fromRGB(139, 0, 139) 
+            closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            closeButton.Text = "X"
+            closeButton.Font = Enum.Font.SourceSans
+            closeButton.TextSize = 24
+            closeButton.Parent = mainFrame
+
+            closeButton.MouseButton1Click:Connect(function()
+                Gui:Destroy()
+            end)
 
             Gui.Line_5.Name = "Line"
             Gui.Line_5.Parent = Gui.Content_11
