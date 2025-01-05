@@ -1,0 +1,145 @@
+local players = game:GetService("Players")
+local player = players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local UserInputService = game:GetService("UserInputService")
+local backpack = player.Backpack
+local root = character:WaitForChild("HumanoidRootPart")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+local runService = game:GetService("RunService")
+local coreGui = game:GetService("CoreGui")
+
+if game.PlaceId == 16732694052 then
+
+local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
+
+local Window = WindUI:CreateWindow({
+    Title = "Pulse [Beta Private]", -- UI Title
+    Icon = "flame", -- Url or rbxassetid or lucide
+    Author = "overhellc/OverHell On Discord ", -- Author & Creator
+    Folder = "Pulse", -- Folder name for saving data (And key)
+    Size = UDim2.fromOffset(5000, 50), -- UI Size
+ 
+    Transparent = true,-- UI Transparency
+    Theme = "Dark", -- UI Theme
+    SideBarWidth = 200, -- UI Sidebar Width (number)
+    HasOutline = true, -- Adds Oultines to the window
+})
+
+local Teleporting = Window:Tab({
+    Title = "Teleporting",
+    Icon = "aperture" -- lucide or rbxassetid
+})
+
+local Game = Teleporting:Section({ Title = "Curse [Beta Private]",TextXAlignment = "Left",TextSize = 17, })
+
+-- Functie om alle spelers in de dropdown te krijgen
+local function updatePlayerList()
+    local options = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        table.insert(options, player.Name)
+    end
+
+    return options
+end
+
+local Dropdown = Teleporting:Dropdown({
+    Title = "Player:",
+    Desc = "Select A Player To Teleport To",
+    Value = "None", -- Startwaarde van de dropdown
+    Multi = false,
+    AllowNone = true,
+    Values = updatePlayerList(), -- Haal alle spelers op
+    Callback = function(selectedPlayer)
+        -- We bewaren de geselecteerde speler, maar teleporteren nog niet
+        _G.SelectedPlayer = selectedPlayer
+    end,
+})
+
+-- Event om de lijst bij te werken wanneer een speler joint of leaved
+players.PlayerAdded:Connect(function()
+    Dropdown.Values = updatePlayerList()
+end)
+
+players.PlayerRemoving:Connect(function()
+    Dropdown.Values = updatePlayerList()
+end)
+
+-- Teleport knop
+local TeleportButton = Teleporting:Button({
+    Title = "Teleport",
+    Desc = "Teleport To Selected Player",
+    Callback = function()
+        local selectedPlayer = _G.SelectedPlayer
+        if selectedPlayer then
+            local targetPlayer = players:FindFirstChild(selectedPlayer)
+            if targetPlayer and targetPlayer.Character then
+                game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(targetPlayer.Character.PrimaryPart.CFrame)
+            else
+                warn("Geselecteerde speler niet gevonden of heeft geen karakter: " .. tostring(selectedPlayer))
+            end
+        else
+            warn("Geen speler geselecteerd om naar te teleporteren")
+        end
+    end,
+})
+
+local TeleportLocations = {
+    ["Ancient Isle"] = CFrame.new(5823.11133, 148.295822, 420.917969, 0.837010145, 1.41420264e-09, -0.547187388, 2.66416311e-08, 1, 4.33371063e-08, 0.547187388, -5.08515612e-08, 0.837010145),
+    ["Moosewood"] = CFrame.new(402.98761, 135.305954, 220.712967, -0.196358651, 9.1305391e-10, 0.980532169, -5.16422061e-09, 1, -1.96535455e-09, -0.980532169, -5.44959855e-09, -0.196358651),
+    ["Snowcap Island"] = CFrame.new(2682.22705, 152.473114, 2396.01562, 0.37175402, 9.0901926e-09, -0.928331256, -1.54625468e-08, 1, 3.59993146e-09, 0.928331256, 1.30160771e-08, 0.37175402),
+    ["Terrapin Island"] = CFrame.new(-167.597275, 142.9216, 1925.8363, -0.417485029, -4.09210195e-08, -0.908683777, -4.26479652e-08, 1, -2.54391388e-08, 0.908683777, 2.81330532e-08, -0.417485029),
+    ["Roslit Bay"] = CFrame.new(-1467.65417, 132.525513, 713.007446, 0.690578043, -1.68946777e-08, 0.723257899, 3.81002651e-12, 1, 2.33554953e-08, -0.723257899, -1.61260356e-08, 0.690578043),
+    ["Sunstone Island"] = CFrame.new(-915.282837, 136.906433, -1130.08264, 0.775210083, 1.54968287e-08, -0.631703496, 8.94641236e-11, 1, 2.46415937e-08, 0.631703496, -1.91589269e-08, 0.775210083),
+    ["Forsaken Shores"] = CFrame.new(-2482.50195, 133.250015, 1555.38501, -0.255851597, 3.12486392e-08, 0.966716051, 1.06196403e-07, 1, -4.21852864e-09, -0.966716051, 1.01582451e-07, -0.255851597),
+    ["Statue Of Sovereignity"] = CFrame.new(25.3250961, 159.014709, -1036.84241, 0.825860739, 5.99459105e-09, 0.563874185, -4.36052618e-11, 1, -1.05672138e-08, -0.563874185, 8.7024592e-09, 0.825860739),
+    ["Northern Expedition"] = CFrame.new(19609.1113, 131.420105, 5229.74707, -0.52511394, 5.46387255e-08, -0.851031959, 3.69640283e-08, 1, 4.13949195e-08, 0.851031959, -9.72051861e-09, -0.52511394),
+    ["Mushgrove Swamp"] = CFrame.new(2456.02783, 130.790176, -670.171387, 0.653738558, 2.75808123e-08, -0.756720483, -3.33506129e-08, 1, 7.63588304e-09, 0.756720483, 2.02452224e-08, 0.653738558),
+    ["Vertigo"] = CFrame.new(-101.570236, -513.299377, 1075.61963, -0.999764085, -2.84657209e-09, 0.0217195675, -2.8466771e-12, 1, 1.30929223e-07, -0.0217195675, 1.30898272e-07, -0.999764085),
+    ["The Depths"] = CFrame.new(947.005127, -711.66217, 1245.40662, -0.26596719, 3.39122721e-08, -0.963982105, 3.64299346e-09, 1, 3.41742421e-08, 0.963982105, 5.5774465e-09, -0.26596719),
+    ["The Arch"] = CFrame.new(995.428467, 131.320236, -1233.41919, -0.999390781, 1.65330416e-08, 0.0349008553, 1.34446605e-08, 1, -8.87247964e-08, -0.0349008553, -8.82015172e-08, -0.999390781),
+    ["Ancient Archives"] = CFrame.new(-3160.3125, -747.206238, 1711.6239, 0.999789417, -1.03902408e-07, -0.020522302, 1.04624924e-07, 1, 3.41325084e-08, 0.020522302, -3.62724641e-08, 0.999789417),
+    ["Keepers Altar"] = CFrame.new(1313.95374, -805.292236, -123.063515, -0.990268052, -3.1581382e-09, 0.13917309, -8.09798539e-09, 1, -3.49280036e-08, -0.13917309, -3.57151073e-08, -0.990268052),
+    ["Brine Pool"] = CFrame.new(-1798.61292, -142.692856, -3409.79956, -0.998035133, 2.65388911e-09, -0.0626569167, -1.09333786e-09, 1, 5.9771196e-08, 0.0626569167, 5.97222609e-08, -0.998035133),
+    ["Desolate Deep"] = CFrame.new(-1633.97461, -231.073257, -2891.30103, 0.737277031, 2.37882825e-10, 0.675590575, -2.34659341e-11, 1, -3.26502381e-10, -0.675590575, 2.24869331e-10, 0.737277031),
+}
+
+local options = {}
+for location in pairs(TeleportLocations) do
+    table.insert(options, location)
+end
+
+getgenv().SelectedLocation = options[1]
+
+local IslandDropdown = Teleporting:Dropdown({
+    Title = "Island:",
+    Desc = "Select An Island To Teleport To",
+    Value = "None",
+    Multi = false,
+    AllowNone = true,
+    Values = options,
+    Callback = function(Options)
+        getgenv().SelectedLocation = Options
+    end,
+})
+
+local TeleportIslandButton = Teleporting:Button({
+    Title = "Teleport to Island",
+    Desc = "Teleports to the selected island",
+    Callback = function()
+        if TeleportLocations[getgenv().SelectedLocation] then
+            local targetCFrame = TeleportLocations[getgenv().SelectedLocation]
+            local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+
+            if character:FindFirstChildOfClass("Humanoid").SeatPart then
+                local vehicle = character:FindFirstChildOfClass("Humanoid").SeatPart.Parent
+                vehicle:SetPrimaryPartCFrame(targetCFrame)
+            else
+                character:SetPrimaryPartCFrame(targetCFrame)
+            end
+        end
+    end,
+})
+
+end
