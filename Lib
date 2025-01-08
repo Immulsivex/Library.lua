@@ -1,6 +1,7 @@
 local UILibrary = {}
 
 -- [ Lib By overhellc/OverHellCurses On Discord. ]
+print("Loading...")
 
 local function getObjGen()
     local objGen = {}
